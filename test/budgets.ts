@@ -3,7 +3,10 @@ import { Budget, BUDGET_TYPE, FinerioConnectSDK } from "../src/index";
 import { Budget as BudgetModel } from "../src/models";
 
 describe("Budgets", () => {
-  const fcs = new FinerioConnectSDK(BUDGET_TYPE);
+  const fcs = new FinerioConnectSDK({
+    includes: BUDGET_TYPE,
+    sandbox: true,
+  });
   const { Budgets } = fcs.connect("905e0065-a797-4139-81ae-66d671a284b7");
   it("Should be Exist", () => {
     return expect(Budgets).to.exist;
