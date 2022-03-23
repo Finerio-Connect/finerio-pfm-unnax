@@ -71,7 +71,7 @@ export default class FinerioConnectSDK {
 
   public connect(token: string): IClassesDictionary {
     this._apiToken = token;
-    this._headers = { ...this._headers, "Api-Key": this._apiToken };
+    this._headers = { ...this._headers, "Authorization": `Bearer ${this._apiToken}` };
     if (this._includedClasses.length) {
       return this._includedClasses.reduce((acc, current) => {
         switch (current) {
