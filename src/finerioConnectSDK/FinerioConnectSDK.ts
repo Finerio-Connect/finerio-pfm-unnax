@@ -30,6 +30,11 @@ interface IClassesDictionary {
   Users?: Users;
 }
 
+interface IConnectParams {
+  token: string;
+  sandbox?: boolean;
+}
+
 const getIncludedClasses = (includes?: string[] | string): string[] => {
   if (includes) {
     if (Array.isArray(includes)) {
@@ -43,22 +48,34 @@ const getIncludedClasses = (includes?: string[] | string): string[] => {
 };
 export default class FinerioConnectSDK {
   private _includedClasses: string[];
-  private _apiKey: string;
+  private _apiToken: string;
   private _serverUrl: string;
   private _headers: AxiosRequestHeaders;
   constructor(includes?: string[] | string) {
     this._includedClasses = getIncludedClasses(includes);
-    this._apiKey = "";
+    this._apiToken = "";
     this._serverUrl = SERVER_URL_SANDBOX;
     this._headers = {};
   }
 
-  public connect(apiKey: string, environment?: string): IClassesDictionary {
-    environment && environment === "production"
-      ? (this._serverUrl = SERVER_URL_PRODUCTION)
-      : (this._serverUrl = SERVER_URL_SANDBOX);
-    this._apiKey = apiKey;
-    this._headers = { ...this._headers, "Api-Key": apiKey };
+  public connect(arg: string | IConnectParams): IClassesDictionary {
+    if (typeof arg === "string") {
+      this._apiToken = arg;
+      this._serverUrl = SERVER_URL_PRODUCTION;
+      return this.classInstances;
+    }
+    if (typeof arg === "object" && arg.token) {
+      this._apiToken = arg.token;
+      this._serverUrl = arg.sandbox
+        ? SERVER_URL_SANDBOX
+        : SERVER_URL_PRODUCTION;
+      return this.classInstances;
+    }
+    return {};
+  }
+
+  private get classInstances(): IClassesDictionary {
+    this._headers = { ...this._headers, "Api-Key": this._apiToken };
     if (this._includedClasses.length) {
       return this._includedClasses.reduce((acc, current) => {
         switch (current) {
@@ -92,8 +109,8 @@ export default class FinerioConnectSDK {
     };
   }
 
-  get apiKey(): string {
-    return this._apiKey;
+  get apiToken(): string {
+    return this._apiToken;
   }
 
   get serverUrl(): string {

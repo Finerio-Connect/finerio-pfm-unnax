@@ -4,7 +4,10 @@ import { Category as CategoryModel } from "../src/models";
 
 describe("Categories", () => {
   const fcs = new FinerioConnectSDK(CATEGORY_TYPE);
-  const { Categories } = fcs.connect("905e0065-a797-4139-81ae-66d671a284b7");
+  const { Categories } = fcs.connect({
+    token: "905e0065-a797-4139-81ae-66d671a284b7",
+    sandbox: true,
+  });
   it("Should be Exist", () => {
     return expect(Categories).to.exist;
   });

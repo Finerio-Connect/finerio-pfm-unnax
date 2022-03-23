@@ -4,7 +4,10 @@ import { Account as AccountModel } from "../src/models";
 
 describe("Accounts", () => {
   const fcs = new FinerioConnectSDK(ACCOUNT_TYPE);
-  const { Accounts } = fcs.connect("905e0065-a797-4139-81ae-66d671a284b7");
+  const { Accounts } = fcs.connect({
+    token: "905e0065-a797-4139-81ae-66d671a284b7",
+    sandbox: true,
+  });
   it("Should be Exist", () => {
     return expect(Accounts).to.exist;
   });
