@@ -2,11 +2,11 @@ import { expect } from "chai";
 import { INSIGHTS_TYPE, FinerioConnectSDK } from "../src/index";
 
 describe("Insights", () => {
-  const fcs = new FinerioConnectSDK(INSIGHTS_TYPE);
-  const { Insights } = fcs.connect({
-    token: "905e0065-a797-4139-81ae-66d671a284b7",
+  const fcs = new FinerioConnectSDK({
+    includes: INSIGHTS_TYPE,
     sandbox: true,
   });
+  const { Insights } = fcs.connect("905e0065-a797-4139-81ae-66d671a284b7");
   const userId = 1115162;
   it("Should be Exist", () => {
     return expect(Insights).to.exist;

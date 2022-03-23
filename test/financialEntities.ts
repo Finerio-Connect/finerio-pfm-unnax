@@ -7,11 +7,11 @@ import {
 import { FinancialEntity as FinancialEntityModel } from "../src/models";
 
 describe("FinancialEntities", () => {
-  const fcs = new FinerioConnectSDK(FINANCIAL_ENTITY_TYPE);
-  const { FinancialEntities } = fcs.connect({
-    token: "905e0065-a797-4139-81ae-66d671a284b7",
+  const fcs = new FinerioConnectSDK({
+    includes: FINANCIAL_ENTITY_TYPE,
     sandbox: true,
   });
+  const { FinancialEntities } = fcs.connect("905e0065-a797-4139-81ae-66d671a284b7");
   it("Should be Exist", () => {
     return expect(FinancialEntities).to.exist;
   });

@@ -3,11 +3,11 @@ import { User, USERS_TYPE, FinerioConnectSDK } from "../src/index";
 import { User as UserModel } from "../src/models";
 
 describe("Users", () => {
-  const fcs = new FinerioConnectSDK(USERS_TYPE);
-  const { Users } = fcs.connect({
-    token: "905e0065-a797-4139-81ae-66d671a284b7",
+  const fcs = new FinerioConnectSDK({
+    includes: USERS_TYPE,
     sandbox: true,
   });
+  const { Users } = fcs.connect("905e0065-a797-4139-81ae-66d671a284b7");
   it("Should be Exist", () => {
     return expect(Users).to.exist;
   });
