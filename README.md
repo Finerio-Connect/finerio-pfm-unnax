@@ -66,17 +66,15 @@ import {
   TRANSACTION_TYPE,
 } from "finerio-pfm-web";
 
-//The constructor can receive an array of types or a single type, depending on which SDK instances you want to use. If constructor has no parameters all the SDK instances will be returned.
-const fcPfm = new FinerioConnectSDK([
-  CATEGORY_TYPE,
-  FINANCIAL_ENTITY_TYPE,
-  TRANSACTION_TYPE,
-]);
+//The constructor can receive an object as parameter specifying in the includes key the SDK instances you want to use as an array of types or a single type, depending on which SDK instances you want to use and in sandbox key the environment to use.
+//If constructor has no parameters all the SDK instances will be returned and production mode will be used.
+const fcPfm = new FinerioConnectSDK({
+  includes: [CATEGORY_TYPE, FINANCIAL_ENTITY_TYPE, TRANSACTION_TYPE],
+  sandbox: true,
+});
 
 //Call the connect method passing the api key as a parameter to obtain an object with the previously established instances.
-const { Categories, FinancialEntities, Transactions } = fcPfm.connect(API_KEY, [
-  environment,
-]);
+const { Categories, FinancialEntities, Transactions } = fcPfm.connect(API_KEY);
 ```
 
 The following constant types can be used:
@@ -89,12 +87,6 @@ The following constant types can be used:
 | BUDGET_TYPE | `Budgets` |
 | INSIGHTS_TYPE | `Insights` |
 | USERS_TYPE | `Users` |
-
-The default environment is SANDBOX, to change it set **environment** to `production`.
-
-```javascript
-const { Categories } = fcPfm.connect(API_KEY, "production");
-```
 
 ---
 
