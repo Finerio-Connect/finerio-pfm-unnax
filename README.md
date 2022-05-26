@@ -1,6 +1,6 @@
 # Finerio PFM Web SDK
 
-This SDK lets you connect to [Finerio PFM API](https://pfm-api-docs.finerioconnect.com/) in an easier way.
+This SDK lets you connect to [Finerio PFM API](http://ec2-3-16-174-50.us-east-2.compute.amazonaws.com:8082/swagger-ui/index.html#/) in an easier way.
 
 ## Table of contents
 
