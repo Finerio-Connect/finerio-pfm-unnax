@@ -1,36 +1,30 @@
 import axios, { AxiosError, AxiosRequestHeaders } from "axios";
-import dotenv from "dotenv";
 
 import Error from "../error";
-
 import {
   ACCOUNT_TYPE,
-  SERVER_URL_SANDBOX,
-  SERVER_URL_PRODUCTION,
   CATEGORY_TYPE,
-  FINANCIAL_ENTITY_TYPE,
   TRANSACTION_TYPE,
   BUDGET_TYPE,
   INSIGHTS_TYPE,
-  USERS_TYPE,
+  SERVER_URL_SAND,
+  SERVER_URL_PROD,
 } from "../constants";
 import { IErrorResponse } from "../interfaces";
 import Categories from "../categories/Categories";
 import Budgets from "../budgets/Budgets";
 import Accounts from "../accounts";
-import FinancialEntities from "../financialEntities";
 import Transactions from "../transactions/Transactions";
 import Insights from "../insights/Insights";
-import Users from "../users/Users";
+import Login from "../models/Login";
+import { LoginResponse } from "../interfaces/login/LoginResponse";
 
 interface IClassesDictionary {
   Accounts?: Accounts;
   Categories?: Categories;
-  FinancialEntities?: FinancialEntities;
   Transactions?: Transactions;
   Budgets?: Budgets;
   Insights?: Insights;
-  Users?: Users;
 }
 
 interface IConnectParams {
@@ -40,14 +34,13 @@ interface IConnectParams {
 
 export default class FinerioConnectSDK {
   private _includedClasses: string[];
-  private _apiToken: string;
-  private _serverUrl?: string;
+  private _serverUrl: string;
+  private _apiToken: string = "";
   private _sandbox: boolean;
   private _headers: AxiosRequestHeaders;
   constructor(arg?: IConnectParams | string[] | string) {
     this._includedClasses = [];
     this._sandbox = false;
-    this._apiToken = "";
     if (arg) {
       if (Array.isArray(arg) || typeof arg === "string") {
         this._includedClasses = this.getIncludedClasses(arg);
@@ -60,18 +53,18 @@ export default class FinerioConnectSDK {
         }
       }
     }
-    if(this._sandbox){
-      dotenv.config({ path: '.env.sandbox' });
-    }else{
-      dotenv.config({ path: '.env.production' });
-    }
-    this._serverUrl = process.env.SERVER_URL;
+    if (this._sandbox) this._serverUrl = SERVER_URL_SAND;
+    else this._serverUrl = SERVER_URL_PROD;
     this._headers = {};
   }
 
-  public connect(token: string): IClassesDictionary {
-    this._apiToken = token;
-    this._headers = { ...this._headers, "Authorization": `Bearer ${this._apiToken}` };
+  public connect(apiToken: string): IClassesDictionary {
+    this._apiToken = apiToken;
+    this._headers = {
+      ...this._headers,
+      Authorization: `Bearer ${apiToken}`,
+    };
+
     if (this._includedClasses.length) {
       return this._includedClasses.reduce((acc, current) => {
         switch (current) {
@@ -81,14 +74,10 @@ export default class FinerioConnectSDK {
             return { ...acc, Categories: new Categories(this) };
           case BUDGET_TYPE:
             return { ...acc, Budgets: new Budgets(this) };
-          case FINANCIAL_ENTITY_TYPE:
-            return { ...acc, FinancialEntities: new FinancialEntities(this) };
           case TRANSACTION_TYPE:
             return { ...acc, Transactions: new Transactions(this) };
           case INSIGHTS_TYPE:
             return { ...acc, Insights: new Insights(this) };
-          case USERS_TYPE:
-            return { ...acc, Users: new Users(this) };
           default:
             return acc;
         }
@@ -97,11 +86,9 @@ export default class FinerioConnectSDK {
     return {
       Accounts: new Accounts(this),
       Categories: new Categories(this),
-      FinancialEntities: new FinancialEntities(this),
       Transactions: new Transactions(this),
       Budgets: new Budgets(this),
       Insights: new Insights(this),
-      Users: new Users(this),
     };
   }
 
@@ -124,7 +111,7 @@ export default class FinerioConnectSDK {
   }
 
   get serverUrl(): string {
-    return this._serverUrl || '';
+    return this._serverUrl;
   }
 
   public doGet(uri: string, success: (response: any) => any): Promise<any> {
@@ -148,7 +135,9 @@ export default class FinerioConnectSDK {
         .post(url, body, {
           headers: this._headers,
         })
-        .then((response) => resolve(success(response.data)))
+        .then((response) => {
+          resolve(success(response.data));
+        })
         .catch((error) => this.processErrors(error, reject));
     });
   }
@@ -175,6 +164,23 @@ export default class FinerioConnectSDK {
         .then((response) => resolve(success(response.data)))
         .catch((error) => this.processErrors(error, reject));
     });
+  }
+
+  public doLogin(
+    username: string,
+    password: string,
+    clientId: number
+  ): Promise<Login> {
+    const uri = `/login`;
+    return this.doPost(
+      uri,
+      { username, password, clientId },
+      this.processLogin
+    );
+  }
+
+  private processLogin(response: LoginResponse): Login {
+    return new Login(response);
   }
 
   private processErrors(

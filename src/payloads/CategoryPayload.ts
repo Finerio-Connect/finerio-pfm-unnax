@@ -4,8 +4,7 @@ export default class CategoryPayload {
   constructor(
     private _name: string,
     private _color: string,
-    private _parentCategoryId: number | null,
-    private _userId?: number | null
+    private _parentCategoryId: number | null
   ) {}
 
   public get name(): string {
@@ -32,20 +31,11 @@ export default class CategoryPayload {
     this._parentCategoryId = parentCategoryId;
   }
 
-  public get userId(): number | null | undefined {
-    return this._userId;
-  }
-
-  public set userId(userId: number | null | undefined) {
-    this._userId = userId;
-  }
-
   public get plainObject(): PlainObject {
     return {
       name: this._name,
       color: this._color,
       parentCategoryId: this._parentCategoryId,
-      userId: this._userId,
     };
   }
 }
