@@ -50,7 +50,7 @@ describe("Categories", () => {
             categoryTest = new CategoryModel(response);
             return expect(response).to.exist;
           });
-        });
+        });/*
         it("Should create Category with parent", () => {
           const categoryPayload = new Category(
             "Test Parent",
@@ -61,7 +61,7 @@ describe("Categories", () => {
             categoryTest = new CategoryModel(response);
             return expect(response).to.exist;
           });
-        });
+        });*/
       });
       describe("#Get", () => {
         it("Should be Error", () => {

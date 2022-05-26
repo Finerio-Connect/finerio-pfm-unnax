@@ -67,7 +67,7 @@ describe("Accounts", () => {
           });
         });
       });
-
+/*
       describe("#Update", () => {
         it("Should be Error", () => {
           return Accounts?.update(0).catch((error) => {
@@ -88,7 +88,7 @@ describe("Accounts", () => {
             expect(response.name).to.equal("Cambio");
           });
         });
-      });
+      });*/
       
       describe("#Delete", () => {
         it("Should be Error", () => {
