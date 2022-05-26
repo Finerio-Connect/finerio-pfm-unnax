@@ -3,7 +3,7 @@ import { PlainObject } from "../types";
 export default class TransactionPayload {
   constructor(
     private _accountId: number,
-    private _date: Date,
+    private _date: Date | number,
     private _charge: boolean,
     private _description: string,
     private _amount: number,
@@ -18,11 +18,11 @@ export default class TransactionPayload {
     this._charge = value;
   }
 
-  public get date(): Date {
+  public get date(): Date | number {
     return this._date;
   }
 
-  public set date(value: Date) {
+  public set date(value: Date | number) {
     this._date = value;
   }
 
@@ -52,7 +52,7 @@ export default class TransactionPayload {
       amount: this._amount,
       categoryId: this._categoryId,
       charge: this._charge,
-      date: this._date.getTime() / 1000,
+      date: this._date as number,
       description: this._description,
     };
   }

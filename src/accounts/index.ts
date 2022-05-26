@@ -4,7 +4,7 @@ import { Account } from "../models";
 import { AccountPayload } from "../payloads";
 
 export default class Accounts {
-  private path: string = "/ddde998e39f1892650715c23817c09e102ac1ec4";
+  private path: string = "/accounts";
 
   constructor(public fcSdk: FinerioConnectSDK) {}
 
@@ -50,10 +50,8 @@ export default class Accounts {
     );
   }
 
-  list(userId: number, cursor?: number): Promise<Account[]> {
-    const uri = `${this.path}?userId=${userId}${
-      cursor ? `&cursor=${cursor}` : ""
-    }`;
+  list(cursor: number): Promise<Account[]> {
+    const uri = `${this.path}?cursor=${cursor}`;
     return this.fcSdk.doGet(uri, this.processListResponse);
   }
 }

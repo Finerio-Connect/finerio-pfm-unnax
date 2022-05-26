@@ -4,7 +4,7 @@ import { Transaction } from "../models";
 import { TransactionPayload } from "../payloads";
 
 export default class Transactions {
-  private path: string = "/cc6ba13e82dbaf4505ae7324c0c151aa53622329";
+  private path: string = "/transactions";
 
   constructor(public fcSdk: FinerioConnectSDK) {}
 

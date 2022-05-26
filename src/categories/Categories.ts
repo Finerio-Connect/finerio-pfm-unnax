@@ -4,7 +4,7 @@ import { Category, ParentCategory } from "../models";
 import { CategoryPayload } from "../payloads";
 
 export default class Categories {
-  private path: string = "/b07db4dc65bda086ae37ffeb8e03a126b18ffa6f";
+  private path: string = "/categories";
 
   constructor(public fcSdk: FinerioConnectSDK) {}
 
@@ -48,10 +48,8 @@ export default class Categories {
     return status === "" ? 204 : 500;
   }
 
-  list(userId?: number, cursor: number = 1): Promise<any> {
-    const uri = `${this.path}${
-      userId ? `?userId=${userId}&cursor=${cursor}` : ""
-    }`;
+  list(): Promise<any> {
+    const uri = `${this.path}`;
     return this.fcSdk.doGet(uri, this.processlistResponse);
   }
 
@@ -61,10 +59,8 @@ export default class Categories {
       : [];
   }
 
-  listWithSubcategories(userId?: number, cursor: number = 1): Promise<any> {
-    const uri = `${this.path}${
-      userId ? `?userId=${userId}&cursor=${cursor}` : ""
-    }`;
+  listWithSubcategories(): Promise<any> {
+    const uri = `${this.path}`;
     return this.fcSdk.doGet(uri, this.processListWithSubcategoriesResponse);
   }
 
