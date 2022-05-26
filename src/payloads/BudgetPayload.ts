@@ -5,8 +5,7 @@ export default class BudgetPayload {
     private _name: string,
     private _amount: number,
     private _warningPercentage: number,
-    private _categoryId?: number | null,
-    private _userId?: number | null,
+    private _categoryId?: number | null
   ) {}
 
   public get categoryId(): number | null | undefined {
@@ -41,21 +40,12 @@ export default class BudgetPayload {
     this._warningPercentage = warningPercentage;
   }
 
-  public get userId(): number | null | undefined {
-    return this._userId;
-  }
-
-  public set userId(userId: number | null | undefined) {
-    this._userId = userId;
-  }
-
   public get plainObject(): PlainObject {
     return {
       categoryId: this._categoryId,
       name: this._name,
       amount: this._amount,
       warningPercentage: this.warningPercentage,
-      userId: this.userId,
     };
   }
 }

@@ -8,8 +8,8 @@ export default class Account implements IAccount {
   private _number: string;
   private _balance: number;
   private _chargeable: boolean;
-  private _dateCreated: Date | null;
-  private _lastUpdated: Date | null;
+  private _dateCreated: number | Date | null;
+  private _lastUpdated: number | Date | null;
   constructor({
     id,
     nature,
@@ -26,8 +26,8 @@ export default class Account implements IAccount {
     this._number = number;
     this._balance = balance;
     this._chargeable = chargeable;
-    this._dateCreated = dateCreated ? new Date(dateCreated) : null;
-    this._lastUpdated = lastUpdated ? new Date(lastUpdated) : null;
+    this._dateCreated = dateCreated ? dateCreated : null;
+    this._lastUpdated = lastUpdated ? lastUpdated : null;
   }
 
   public get id(): number {
@@ -74,11 +74,11 @@ export default class Account implements IAccount {
     this._chargeable = value;
   }
 
-  public get dateCreated(): Date | null {
+  public get dateCreated(): number | Date | null {
     return this._dateCreated;
   }
 
-  public get lastUpdated(): Date | null {
+  public get lastUpdated(): number | Date | null {
     return this._lastUpdated;
   }
 
@@ -90,8 +90,8 @@ export default class Account implements IAccount {
       number: this._number,
       balance: this._balance,
       chargeable: this._chargeable,
-      dateCreated: this._dateCreated && this._dateCreated.getTime() / 1000,
-      lastUpdated: this.lastUpdated && this.lastUpdated.getTime() / 1000,
+      dateCreated: this._dateCreated && (this._dateCreated as number),
+      lastUpdated: this._lastUpdated && (this._lastUpdated as number),
     };
   }
 }

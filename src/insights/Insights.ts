@@ -3,21 +3,16 @@ import { IAnalysisResponse, IResumeResponse } from "../interfaces/insights";
 import { Analysis, Resume } from "../models";
 
 export default class Insights {
-  private resumePath: string = "/f4f8faab7f280eaf05fc812c285c7902f6a6d05a";
-  private analysisPath: string = "/824aa15eed3dfc815bd0bec5c34354d471a44557";
+  private resumePath: string = "/resume";
+  private analysisPath: string = "/analysis";
 
   constructor(public fcSdk: FinerioConnectSDK) {}
 
-  resume(
-    userId: number,
-    accountId?: number,
-    dateFrom?: number,
-    dateTo?: number
-  ) {
-    const uri = `${this.resumePath}?userId=${userId}${
+  resume(accountId?: number, dateFrom?: number, dateTo?: number) {
+    const uri = `${this.resumePath}${
       accountId ? `?accountId=${accountId}` : ""
-    }${dateFrom ? `?dateFrom=${dateFrom}` : ""}${
-      dateTo ? `?accountId=${dateTo}` : ""
+    }${dateFrom ? `&dateFrom=${dateFrom}` : ""}${
+      dateTo ? `&dateTo=${dateTo}` : ""
     }`;
 
     return this.fcSdk.doGet(uri, this.processResumeResponse);
@@ -27,17 +22,10 @@ export default class Insights {
     return new Resume(response);
   }
 
-  analysis(
-    userId: number,
-    accountId?: number,
-    dateFrom?: number,
-    dateTo?: number
-  ) {
-    const uri = `${this.analysisPath}?userId=${userId}${
-      accountId ? `?accountId=${accountId}` : ""
-    }${dateFrom ? `?dateFrom=${dateFrom}` : ""}${
-      dateTo ? `?accountId=${dateTo}` : ""
-    }`;
+  analysis(dateFrom?: number, dateTo?: number) {
+    const uri = `${this.analysisPath}${
+      dateFrom ? `?dateFrom=${dateFrom}` : ""
+    }${dateTo ? `&dateTo=${dateTo}` : ""}`;
 
     return this.fcSdk.doGet(uri, this.processAnalysisResponse);
   }

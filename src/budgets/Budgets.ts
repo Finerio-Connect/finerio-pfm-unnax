@@ -4,7 +4,7 @@ import { Budget } from "../models";
 import { BudgetPayload } from "../payloads";
 
 export default class Budgets {
-  path: string = "/205e33ba58fee3ee07ef1a8cccc4ba9b97d3caf2";
+  path: string = "/budgets";
 
   constructor(public fcSdk: FinerioConnectSDK) {}
 
@@ -48,8 +48,8 @@ export default class Budgets {
     return status === "" ? 204 : 500;
   }
 
-  list(userId: number): Promise<any> {
-    const uri = `${this.path}${`?userId=${userId}`}`;
+  list(cursor?: number): Promise<any> {
+    const uri = `${this.path}${cursor ? `?userId=${cursor}` : ""}`;
     return this.fcSdk.doGet(uri, this.processlistResponse);
   }
 

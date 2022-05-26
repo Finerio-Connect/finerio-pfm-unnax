@@ -2,21 +2,13 @@ import { PlainObject } from "../types";
 
 export default class AccountPayload {
   constructor(
-    private _userId: number,
     private _financialEntityId: number,
     private _nature: string,
     private _name: string,
     private _number: string,
-    private _balance: number
+    private _balance: number,
+    private _chargeable?: boolean
   ) {}
-
-  public get userId(): number {
-    return this._userId;
-  }
-
-  public set userId(value: number) {
-    this._userId = value;
-  }
 
   public get financialEntityId(): number {
     return this._financialEntityId;
@@ -58,14 +50,22 @@ export default class AccountPayload {
     this._balance = value;
   }
 
+  public get chargeable(): boolean | undefined {
+    return this._chargeable;
+  }
+
+  public set chargeable(value: boolean | undefined) {
+    this._chargeable = value;
+  }
+
   public get plainObject(): PlainObject {
     return {
-      userId: this._userId,
       financialEntityId: this._financialEntityId,
       nature: this._nature,
       name: this._name,
       number: this._number,
       balance: this._balance,
+      chargeable: this._chargeable,
     };
   }
 }
