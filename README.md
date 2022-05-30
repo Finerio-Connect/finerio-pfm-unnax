@@ -1,6 +1,6 @@
 # Finerio PFM Web SDK
 
-This SDK lets you connect to [Finerio PFM API](http://ec2-3-16-174-50.us-east-2.compute.amazonaws.com:8082/swagger-ui/index.html#/) in an easier way.
+This SDK lets you connect to [Finerio PFM API Unnax](http://ec2-3-16-174-50.us-east-2.compute.amazonaws.com:8082/swagger-ui/index.html#/) in an easier way.
 
 ## Table of contents
 
@@ -41,14 +41,14 @@ This SDK lets you connect to [Finerio PFM API](http://ec2-3-16-174-50.us-east-2.
 NPM:
 
 ```
-npm install finerio-pfm-web
+npm i finerio-pfm-unnax
 ```
 
 ## Setup
 
 ```javascript
-import { FinerioConnectSDK } from "finerio-pfm-web";
-import { CATEGORY_TYPE, TRANSACTION_TYPE } from "finerio-pfm-web";
+import { FinerioConnectSDK } from "finerio-pfm-unnax";
+import { CATEGORY_TYPE, TRANSACTION_TYPE } from "finerio-pfm-unnax";
 
 //The constructor can receive an object as parameter specifying in the includes key the SDK instances you want to use as an array of types or a single type, depending on which SDK instances you want to use and in sandbox key the environment to use.
 //If constructor has no parameters all the SDK instances will be returned and production mode will be used.
@@ -80,8 +80,6 @@ The following constant types can be used:
 | INSIGHTS_TYPE | `Insights` |
 
 ---
-
-**Production environment is not available at this version**
 
 ## Usage
 
@@ -163,7 +161,7 @@ Account {
 Creates an account. A previosuly created user and a financial entity is required. You have to import the Account Payload Model to create a new one.
 
 ```javascript
-import { Account } from "finerio-pfm-web";
+import { Account } from "finerio-pfm-unnax";
 
 ...
 
@@ -202,7 +200,7 @@ Account {
 Updates an account. You have to import the Account Payload Model to update it.
 
 ```javascript
-import { Account } from "finerio-pfm-web";
+import { Account } from "finerio-pfm-unnax";
 
 ...
 
@@ -376,7 +374,7 @@ Category {
 Creates a category. If a user ID is not specified, the category is considered as a system category. If a parent category ID is specified, the category is considered a subcategory. You have to import the Category Payload Model to update it.
 
 ```javascript
-import { Category } from "finerio-pfm-web";
+import { Category } from "finerio-pfm-unnax";
 
 ...
 const name = "Streaming";
@@ -408,7 +406,7 @@ Category {
 Given a valid category id updates a category. You have to import the Category Payload Model to update it.
 
 ```javascript
-import { Category } from "finerio-pfm-web";
+import { Category } from "finerio-pfm-unnax";
 
 ...
 const name = "Streaming Test";
@@ -544,7 +542,7 @@ Transaction {
 Creates a transaction. A previosuly created account is required. You have to import the Transaction Payload Model to create a new one.
 
 ```javascript
-import { Transaction } from "finerio-pfm-web";
+import { Transaction } from "finerio-pfm-unnax";
 
 ...
 
@@ -583,7 +581,7 @@ Transaction {
 Given a valid transaction id updates a transaction. The new name should not be previously registered. You have to import the Transaction Payload Model to update it.
 
 ```javascript
-import { Transaction } from "finerio-pfm-web";
+import { Transaction } from "finerio-pfm-unnax";
 
 ...
 
@@ -721,7 +719,7 @@ Budget {
 Creates a budget. You have to import the Budget Payload Model to create a new one.
 
 ```javascript
-import { Budget } from "finerio-pfm-web";
+import { Budget } from "finerio-pfm-unnax";
 
 ...
 const name = "Budget Test";
@@ -766,7 +764,7 @@ Budget {
 Given a valid budget id updates a budget. You have to import the User Payload Model to update it.
 
 ```javascript
-import { Budget } from "finerio-pfm-web";
+import { Budget } from "finerio-pfm-unnax";
 
 ...
 
