@@ -35,6 +35,14 @@ describe("Transactions", () => {
             expect(response.length).to.be.greaterThan(0);
           });
         });
+        it("Should be Success", () => {
+          return Transactions?.list(accountId, { categoryId: 79 }).then(
+            (response) => {
+              expect(response).to.be.an("array");
+              expect(response.length).to.be.greaterThan(0);
+            }
+          );
+        });
       });
       let newTransaction: TransactionModel;
 
@@ -42,7 +50,7 @@ describe("Transactions", () => {
         it("Should be Success", () => {
           let transaction = new Transaction(
             accountId,
-            (new Date()).getTime(),
+            new Date().getTime(),
             true,
             "Mocha Test",
             1111,
@@ -79,7 +87,7 @@ describe("Transactions", () => {
         it("Should be Success", () => {
           let transaction = new Transaction(
             accountId,
-            (new Date()).getTime(),
+            new Date().getTime(),
             false,
             "Mocha Test",
             1111,

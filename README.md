@@ -94,7 +94,7 @@ An account is the representation of your users' bank accounts.
 Fetches a list of accounts per user, sorted by ID in descending order.
 
 ```javascript
-Accounts.list(cursor)
+Accounts.list(id)
   .then((data) => console.log(data))
   .catch((error) => console.log(error));
 ```
@@ -164,14 +164,17 @@ Creates an account. A previosuly created user and a financial entity is required
 import { Account } from "finerio-pfm-unnax";
 
 ...
-
+const financialEntityId = 1115164;
+const nature = "Mortgage",;
+const name = "Cuenta prueba",;
+const number = "1111 1111 1111 1111",;
+const balance = 1000;
 const account = new Account(
-        1115164,
-        743443,
-        "Mortgage",
-        "Cuenta prueba",
-        "1111 1111 1111 1111",
-        1000
+        financialEntityId,
+        nature,
+        name,
+        number,
+        balance
       );
 
 Accounts.create(account)
@@ -204,13 +207,17 @@ import { Account } from "finerio-pfm-unnax";
 
 ...
 
+const financialEntityId = 1115164;
+const nature = "Mortgage",;
+const name = "Cuenta prueba 2",;
+const number = "1111 1111 1111 1111",;
+const balance = 1000;
 const account = new Account(
-        1115164,
-        743443,
-        "Mortgage",
-        "Cuenta prueba 2",
-        "1111 1111 1111 1111",
-        1000
+        financialEntityId,
+        nature,
+        name,
+        number,
+        balance
       );
 
 Accounts.update(accountId, account)
@@ -545,14 +552,19 @@ Creates a transaction. A previosuly created account is required. You have to imp
 import { Transaction } from "finerio-pfm-unnax";
 
 ...
-
+const accountId = 23;
+const date = new Date().getTime();
+const charge = true;
+const description = "Transaction Test";
+const amount = 1111;
+const categoryId = 26;
 const transaction = new Transaction(
-        2230303,
-        new Date(),
-        true,
-        "Transaction Test",
-        1111,
-        79
+        accountId,
+        date,
+        charge,
+        description,
+        amount,
+        categoryId
       );
 
 Transactions.create(transaction)
@@ -585,13 +597,19 @@ import { Transaction } from "finerio-pfm-unnax";
 
 ...
 
+const accountId = 23;
+const date = new Date().getTime();
+const charge = true;
+const description = "Edited Transaction Test";
+const amount = 1111;
+const categoryId = 26;
 const transaction = new Transaction(
-        2230303,
-        new Date(),
-        true,
-        "Edited Transaction Test",
-        1111,
-        79
+        accountId,
+        date,
+        charge,
+        description,
+        amount,
+        categoryId
       );
 
 Transactions.update(transactionId, transaction)
@@ -726,14 +744,12 @@ const name = "Budget Test";
 const amount = 5000;
 const warningPercentage = 0.5;
 const categoryId = 15;
-const userId = 1115162;
 
 const newBudget = new Budget(
   name,
   amount,
   warningPercentage,
-  categoryId,
-  userId
+  categoryId
 );
 
 Budgets.create(newBudget)
