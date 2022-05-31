@@ -50,8 +50,8 @@ export default class Accounts {
     );
   }
 
-  list(cursor: number): Promise<Account[]> {
-    const uri = `${this.path}?cursor=${cursor}`;
+  list(cursor?: number): Promise<Account[]> {
+    const uri = `${this.path}${cursor ? `?cursor=${cursor}` : ""}`;
     return this.fcSdk.doGet(uri, this.processListResponse);
   }
 }
