@@ -12,12 +12,7 @@ describe("Accounts", () => {
   });
 
   it("Get token", () => {
-    return fcs.doLogin(username, password, clientId).then((response) => {
-      const token = response.access_token;
-      expect(token).to.exist;
-      expect(token).to.be.string;
-      const { Accounts } = fcs.connect(token);
-
+    return fcs.login(username, password, clientId).then(({ Accounts }) => {
       it("Should be Exist", () => {
         return expect(Accounts).to.exist;
       });
@@ -67,7 +62,7 @@ describe("Accounts", () => {
           });
         });
       });
-/*
+      /*
       describe("#Update", () => {
         it("Should be Error", () => {
           return Accounts?.update(0).catch((error) => {
@@ -89,7 +84,7 @@ describe("Accounts", () => {
           });
         });
       });*/
-      
+
       describe("#Delete", () => {
         it("Should be Error", () => {
           return Accounts?.delete(0).catch((error) => {

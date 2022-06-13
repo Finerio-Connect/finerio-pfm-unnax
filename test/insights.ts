@@ -11,12 +11,7 @@ describe("Insights", () => {
   });
 
   it("Get token", () => {
-    return fcs.doLogin(username, password, clientId).then((response) => {
-      const token = response.access_token;
-      expect(token).to.exist;
-      expect(token).to.be.string;
-
-      const { Insights } = fcs.connect(token);
+    return fcs.login(username, password, clientId).then(({ Insights }) => {
       it("Should be Exist", () => {
         return expect(Insights).to.exist;
       });
@@ -28,18 +23,21 @@ describe("Insights", () => {
           });
         });
         it("Should return user's resume", () => {
-          return Insights?.resume().catch((response) => {
+          return Insights?.resume().then((response) => {
             expect(response.incomes).to.exist;
             expect(response.expenses).to.exist;
             expect(response.balances).to.exist;
-            expect(
+            expect(response.expenses[0].categories[0].subcategories).to.be.an(
+              "array"
+            );
+            /* expect(
               response.expenses[0].categories[0].subcategories[0]
                 .transactionsByDate[0].transactions
             ).to.be.an("array");
             expect(
               response.expenses[0].categories[0].subcategories[0]
                 .transactionsByDate[0].transactions
-            ).to.be.greaterThan(0);
+            ).to.be.greaterThan(0); */
           });
         });
       });
@@ -51,15 +49,16 @@ describe("Insights", () => {
           });
         });
         it("Should return user's analysis", () => {
-          return Insights?.analysis().catch((response) => {
+          return Insights?.analysis().then((response) => {
             expect(response).to.be.an("array");
             expect(response.length).to.be.greaterThan(0);
-            expect(
+            expect(response[0].categories[0].subcategories).to.be.an("array");
+            /*  expect(
               response[0].categories[0].subcategories[0].transactions
             ).to.be.an("array");
             expect(
               response[0].categories[0].subcategories[0].transactions
-            ).to.be.greaterThan(0);
+            ).to.be.greaterThan(0); */
           });
         });
       });

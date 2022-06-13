@@ -8,8 +8,12 @@ export default class Transactions {
 
   constructor(public fcSdk: FinerioConnectSDK) {}
 
-  private processResponse(response: ITransaction): Transaction {
-    return new Transaction(response);
+  private processResponseBuild(
+    accountId?: number
+  ): (response: ITransaction) => Transaction {
+    return (response: ITransaction): Transaction => {
+      return new Transaction({ ...response, accountId });
+    };
   }
 
   private processDeleteResponse(status: string): number {
@@ -31,15 +35,18 @@ export default class Transactions {
 
   /*  */
 
-  get(id: number): Promise<ITransaction> {
-    return this.fcSdk.doGet(`${this.path}/${id}`, this.processResponse);
+  get(id: number, accountId?: number): Promise<ITransaction> {
+    return this.fcSdk.doGet(
+      `${this.path}/${id}`,
+      this.processResponseBuild(accountId)
+    );
   }
 
   update(id: number, updateObject?: TransactionPayload): Promise<Transaction> {
     return this.fcSdk.doPut(
       `${this.path}/${id}`,
       updateObject ? updateObject.plainObject : {},
-      this.processResponse
+      this.processResponseBuild(updateObject && updateObject.accountId)
     );
   }
 
@@ -47,7 +54,9 @@ export default class Transactions {
     return this.fcSdk.doPost(
       this.path,
       transactionToCreate.plainObject,
-      this.processResponse
+      this.processResponseBuild(
+        transactionToCreate && transactionToCreate.accountId
+      )
     );
   }
 

@@ -36,6 +36,7 @@ export default class FinerioConnectSDK {
   private _includedClasses: string[];
   private _serverUrl: string;
   private _apiToken: string = "";
+  private _refreshToken: string = "";
   private _sandbox: boolean;
   private _headers: AxiosRequestHeaders;
   constructor(arg?: IConnectParams | string[] | string) {
@@ -58,8 +59,9 @@ export default class FinerioConnectSDK {
     this._headers = {};
   }
 
-  public connect(apiToken: string): IClassesDictionary {
+  public connect(apiToken: string, refreshToken: string): IClassesDictionary {
     this._apiToken = apiToken;
+    this._refreshToken = refreshToken;
     this._headers = {
       ...this._headers,
       Authorization: `Bearer ${apiToken}`,
@@ -166,17 +168,22 @@ export default class FinerioConnectSDK {
     });
   }
 
-  public doLogin(
+  public login(
     username: string,
     password: string,
     clientId: number
-  ): Promise<Login> {
-    const uri = `/login`;
-    return this.doPost(
-      uri,
-      { username, password, clientId },
-      this.processLogin
-    );
+  ): Promise<IClassesDictionary> {
+    return new Promise((resolve, reject) => {
+      const uri = `/login`;
+      this.doPost(uri, { username, password, clientId }, this.processLogin)
+        .then((response) => {
+          const { access_token, refresh_token } = response;
+          resolve(this.connect(access_token, refresh_token));
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
   }
 
   private processLogin(response: LoginResponse): Login {
