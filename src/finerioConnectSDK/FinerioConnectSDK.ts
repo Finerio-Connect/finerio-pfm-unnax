@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosRequestHeaders } from "axios";
+import axios, { AxiosError, AxiosRequestHeaders, AxiosInstance } from "axios";
 
 import Error from "../error";
 import {
@@ -34,11 +34,10 @@ interface IConnectParams {
 
 export default class FinerioConnectSDK {
   private _includedClasses: string[];
-  private _serverUrl: string;
   private _apiToken: string = "";
   private _refreshToken: string = "";
   private _sandbox: boolean;
-  private _headers: AxiosRequestHeaders;
+  private _axiosApiInstance: AxiosInstance;
   constructor(arg?: IConnectParams | string[] | string) {
     this._includedClasses = [];
     this._sandbox = false;
@@ -54,18 +53,49 @@ export default class FinerioConnectSDK {
         }
       }
     }
-    if (this._sandbox) this._serverUrl = SERVER_URL_SAND;
-    else this._serverUrl = SERVER_URL_PROD;
-    this._headers = {};
+
+    if (this._sandbox) {
+      this._axiosApiInstance = axios.create({
+        baseURL: SERVER_URL_SAND,
+      });
+    } else {
+      this._axiosApiInstance = axios.create({
+        baseURL: SERVER_URL_PROD,
+      });
+    }
   }
 
   public connect(apiToken: string, refreshToken: string): IClassesDictionary {
     this._apiToken = apiToken;
     this._refreshToken = refreshToken;
-    this._headers = {
-      ...this._headers,
-      Authorization: `Bearer ${apiToken}`,
-    };
+    this._axiosApiInstance.interceptors.request.use(
+      (config) => {
+        config.headers = {
+          Authorization: `Bearer ${apiToken}`,
+        };
+        return config;
+      },
+      (error) => {
+        Promise.reject(error);
+      }
+    );
+
+    /* this._axiosApiInstance.interceptors.response.use(
+      (response) => {
+        return response;
+      },
+      async (error) => {
+        const originalRequest = error.config;
+        if (error.response.status === 403 && !originalRequest._retry) {
+          originalRequest._retry = true;
+          const access_token = await refreshAccessToken();
+          axios.defaults.headers.common["Authorization"] =
+            "Bearer " + access_token;
+          return this._axiosApiInstance(originalRequest);
+        }
+        return Promise.reject(error);
+      }
+    ); */
 
     if (this._includedClasses.length) {
       return this._includedClasses.reduce((acc, current) => {
@@ -112,15 +142,14 @@ export default class FinerioConnectSDK {
     return this._apiToken;
   }
 
-  get serverUrl(): string {
-    return this._serverUrl;
+  get refreshToken(): string {
+    return this._refreshToken;
   }
 
   public doGet(uri: string, success: (response: any) => any): Promise<any> {
-    const url = `${this._serverUrl}${uri}`;
     return new Promise<any>((resolve, reject) => {
-      axios
-        .get(url, { headers: this._headers })
+      this._axiosApiInstance
+        .get(uri)
         .then((response) => resolve(success(response.data)))
         .catch((error) => this.processErrors(error, reject));
     });
@@ -131,12 +160,9 @@ export default class FinerioConnectSDK {
     body: any,
     success: (response: any) => any
   ): Promise<any> {
-    const url = `${this._serverUrl}${uri}`;
     return new Promise<any>((resolve, reject) => {
-      axios
-        .post(url, body, {
-          headers: this._headers,
-        })
+      this._axiosApiInstance
+        .post(uri, body)
         .then((response) => {
           resolve(success(response.data));
         })
@@ -149,20 +175,18 @@ export default class FinerioConnectSDK {
     body: any,
     success: (response: any) => any
   ): Promise<any> {
-    const url = `${this._serverUrl}${uri}`;
     return new Promise<any>((resolve, reject) => {
-      axios
-        .put(url, body, { headers: this._headers })
+      this._axiosApiInstance
+        .put(uri, body)
         .then((response) => resolve(success(response.data)))
         .catch((error) => this.processErrors(error, reject));
     });
   }
 
   public doDelete(uri: string, success: (response: any) => any): Promise<any> {
-    const url = `${this._serverUrl}${uri}`;
     return new Promise<any>((resolve, reject) => {
-      axios
-        .delete(url, { headers: this._headers })
+      this._axiosApiInstance
+        .delete(uri)
         .then((response) => resolve(success(response.data)))
         .catch((error) => this.processErrors(error, reject));
     });
