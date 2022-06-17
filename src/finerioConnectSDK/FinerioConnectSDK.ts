@@ -35,9 +35,12 @@ interface IConnectParams {
 export default class FinerioConnectSDK {
   private _includedClasses: string[];
   private _apiToken: string = "";
+  private _apiKey: string = "";
+  private _baseURL: string = "";
   private _refreshToken: string = "";
   private _sandbox: boolean;
   private _axiosApiInstance: AxiosInstance;
+  private _tokenExpiresDate: Date | null = null;
   constructor(arg?: IConnectParams | string[] | string) {
     this._includedClasses = [];
     this._sandbox = false;
@@ -55,48 +58,57 @@ export default class FinerioConnectSDK {
     }
 
     if (this._sandbox) {
-      this._axiosApiInstance = axios.create({
-        baseURL: SERVER_URL_SAND,
-      });
+      this._baseURL = SERVER_URL_SAND;
     } else {
-      this._axiosApiInstance = axios.create({
-        baseURL: SERVER_URL_PROD,
-      });
+      this._baseURL = SERVER_URL_PROD;
     }
-  }
-
-  public connect(apiToken: string, refreshToken: string): IClassesDictionary {
-    this._apiToken = apiToken;
-    this._refreshToken = refreshToken;
+    this._axiosApiInstance = axios.create({
+      baseURL: this._baseURL,
+    });
     this._axiosApiInstance.interceptors.request.use(
-      (config) => {
-        config.headers = {
-          Authorization: `Bearer ${apiToken}`,
-        };
+      async (config) => {
+        if (this._apiToken && this._tokenExpiresDate) {
+          if (Date.now() >= this._tokenExpiresDate.getTime()) {
+            await this.refreshApiToken();
+          }
+          config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${this._apiToken}`,
+          };
+        }
         return config;
       },
       (error) => {
         Promise.reject(error);
       }
     );
-
-    /* this._axiosApiInstance.interceptors.response.use(
+    this._axiosApiInstance.interceptors.response.use(
       (response) => {
-        return response;
+        return response.data;
       },
       async (error) => {
         const originalRequest = error.config;
-        if (error.response.status === 403 && !originalRequest._retry) {
+        if (
+          this.refreshToken &&
+          error.response.status === 401 &&
+          this._refreshToken &&
+          !originalRequest._retry
+        ) {
           originalRequest._retry = true;
-          const access_token = await refreshAccessToken();
-          axios.defaults.headers.common["Authorization"] =
-            "Bearer " + access_token;
+          await this.refreshApiToken();
+          /* this._axiosApiInstance.defaults.headers.common["Authorization"] =
+            "Bearer " + access_token; */
           return this._axiosApiInstance(originalRequest);
         }
         return Promise.reject(error);
       }
-    ); */
+    );
+  }
 
+  public connect(apiKey?: string): IClassesDictionary {
+    if (apiKey) {
+      this._apiKey = apiKey;
+    }
     if (this._includedClasses.length) {
       return this._includedClasses.reduce((acc, current) => {
         switch (current) {
@@ -150,7 +162,7 @@ export default class FinerioConnectSDK {
     return new Promise<any>((resolve, reject) => {
       this._axiosApiInstance
         .get(uri)
-        .then((response) => resolve(success(response.data)))
+        .then((response) => resolve(success(response)))
         .catch((error) => this.processErrors(error, reject));
     });
   }
@@ -164,7 +176,7 @@ export default class FinerioConnectSDK {
       this._axiosApiInstance
         .post(uri, body)
         .then((response) => {
-          resolve(success(response.data));
+          resolve(success(response));
         })
         .catch((error) => this.processErrors(error, reject));
     });
@@ -178,7 +190,7 @@ export default class FinerioConnectSDK {
     return new Promise<any>((resolve, reject) => {
       this._axiosApiInstance
         .put(uri, body)
-        .then((response) => resolve(success(response.data)))
+        .then((response) => resolve(success(response)))
         .catch((error) => this.processErrors(error, reject));
     });
   }
@@ -187,9 +199,17 @@ export default class FinerioConnectSDK {
     return new Promise<any>((resolve, reject) => {
       this._axiosApiInstance
         .delete(uri)
-        .then((response) => resolve(success(response.data)))
+        .then((response) => resolve(success(response)))
         .catch((error) => this.processErrors(error, reject));
     });
+  }
+
+  private setNewAccessData(data: LoginResponse) {
+    const { access_token, refresh_token, expires_in } = data;
+    const currentTimeAsMs = Date.now();
+    this._apiToken = access_token;
+    this._refreshToken = refresh_token;
+    this._tokenExpiresDate = new Date(currentTimeAsMs + expires_in);
   }
 
   public login(
@@ -201,11 +221,37 @@ export default class FinerioConnectSDK {
       const uri = `/login`;
       this.doPost(uri, { username, password, clientId }, this.processLogin)
         .then((response) => {
-          const { access_token, refresh_token } = response;
-          resolve(this.connect(access_token, refresh_token));
+          this.setNewAccessData(response);
+          resolve(this.connect());
         })
         .catch((error) => {
           reject(error);
+        });
+    });
+  }
+
+  public refreshApiToken(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      const uri = `${this._baseURL}/oauth/access_token?refresh_token=${this._refreshToken}`;
+      axios
+        .post(uri, "", {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${this._apiToken}`,
+          },
+        })
+        .then(({ data }) => {
+          this.setNewAccessData(data);
+          resolve(true);
+        })
+        .catch((error) => {
+          reject(
+            new Error(
+              `${error.response.status}`,
+              error.response.data.path,
+              error.response.data.error
+            )
+          );
         });
     });
   }
