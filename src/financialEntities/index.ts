@@ -11,19 +11,24 @@ export default class FinancialEntitites {
     return new FinancialEntity(response);
   }
 
-  private processListResponse(response: IFinancialEntityRes): FinancialEntity[] {
+  private processListResponse(
+    response: IFinancialEntityRes
+  ): FinancialEntity[] {
     if (!response.data) {
       return [];
     }
-    return response.data.map((financialEntity: IFinancialEntity) => new FinancialEntity(financialEntity));
+    return response.data.map(
+      (financialEntity: IFinancialEntity) =>
+        new FinancialEntity(financialEntity)
+    );
   }
 
   get(id: number): Promise<IFinancialEntity> {
     return this.fcSdk.doGet(`${this.path}/${id}`, this.processResponse);
   }
 
-  list(): Promise<FinancialEntity[]> {
-    const uri = `${this.path}`;
+  list(cursor?: number): Promise<FinancialEntity[]> {
+    const uri = `${this.path}${cursor ? "?cursor=" + cursor : ""}`;
     return this.fcSdk.doGet(uri, this.processListResponse);
   }
 }

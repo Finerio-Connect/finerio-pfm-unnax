@@ -35,6 +35,9 @@ This SDK lets you connect to [Finerio PFM API](http://ec2-3-16-174-50.us-east-2.
   - [Insights](#insights)
     - [Resume](#resume)
     - [Analysis](#analysis)
+  - [Financial Entities](#financial-entities)
+    - [List Financial Entities](#list-financial-entities)
+    - [Get Financial Entity](#get-financial-entity)
 
 ## Installation
 
@@ -57,17 +60,14 @@ const fcPfm = new FinerioConnectSDK({
   sandbox: true,
 });
 
-//Call the doLogin method to obatain the access_token
+//Call the login method to obatain the an object with the previously established instances.
 fcPfm
-  .doLogin(username, password, clientId)
-  .then((response) => {
-    const TOKEN = response.access_token;
-    console.log(response);
+  .login(username, password, clientId)
+  .then(({ Categories, Transactions }) => {
+    ...
   })
   .catch((error) => console.log(error));
 
-//Call the connect method passing the token as a parameter to obtain an object with the previously established instances.
-const { Categories, Transactions } = fcPfm.connect(TOKEN);
 ```
 
 The following constant types can be used:
@@ -78,6 +78,8 @@ The following constant types can be used:
 | TRANSACTION_TYPE | `Transactions` |
 | BUDGET_TYPE | `Budgets` |
 | INSIGHTS_TYPE | `Insights` |
+| FINANCIAL_ENTITY_TYPE | `FinancialEntities` |
+
 
 ---
 
@@ -949,5 +951,70 @@ Resume {
     Balance { incomes: 0, expenses: 400, date: 1646114400000 }
   ]
 }
+
+```
+
+### Financial Entities
+
+Financial entities represents the financial institutions where your customers keep their money, or something else that helps you modelling the way you manage the accounts of your users.
+
+### List Financial Entities
+
+Fetches a list of financial entities per client,, sorted by ID in descending order.
+
+```javascript
+FinancialEntities.list(cursor)
+  .then((data) => console.log(data))
+  .catch((error) => console.log(error));
+```
+
+The list starts with the item that has that ID.
+
+Output:
+
+```console
+[
+  FinancialEntity {
+    id: 12,
+    dateCreated: 1646243107260,
+    lastUpdated: 1646243107260,
+    name: "New Bank",
+    code: "NBK",
+    image_path: "http://image/logo.png",
+  },
+  FinancialEntity {
+    id: 13,
+    dateCreated: 1646243107260,
+    lastUpdated: 1646243107260,
+    name: "Central Bank",
+    code: "CBK",
+    image_path: "http://image/logo.png",
+  }
+  ...
+]
+
+```
+
+### Get Financial Entity
+
+Given a valid financial entity ID, fetches the information of an financial entity.
+
+```javascript
+FinancialEntities.get(financialEntityId)
+  .then((data) => console.log(data))
+  .catch((error) => console.log(error));
+```
+
+Output:
+
+```console
+FinancialEntity {
+  id: 13,
+  dateCreated: 1646243107260,
+  lastUpdated: 1646243107260,
+  name: "Central Bank",
+  code: "CBK",
+  image_path: "http://image/logo.png",
+},
 
 ```

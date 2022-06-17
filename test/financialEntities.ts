@@ -18,6 +18,12 @@ describe("Financial Entities", () => {
           return expect(FinancialEntities).to.exist;
         });
         describe("#List", () => {
+          it("Should be Error", () => {
+            return FinancialEntities?.list(0).catch((error) => {
+              expect(error).to.be.an("array");
+              expect(error.length).to.be.greaterThan(0);
+            });
+          });
           it("Should be Success", () => {
             return FinancialEntities?.list().then((response) => {
               expect(response).to.be.an("array");
