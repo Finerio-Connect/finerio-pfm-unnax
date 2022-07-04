@@ -1,9 +1,10 @@
-import axios, { AxiosError, AxiosRequestHeaders } from "axios";
+import axios, { AxiosError, AxiosRequestHeaders, AxiosInstance } from "axios";
 
 import Error from "../error";
 import {
   ACCOUNT_TYPE,
   CATEGORY_TYPE,
+  FINANCIAL_ENTITY_TYPE,
   TRANSACTION_TYPE,
   BUDGET_TYPE,
   INSIGHTS_TYPE,
@@ -16,6 +17,7 @@ import Budgets from "../budgets/Budgets";
 import Accounts from "../accounts";
 import Transactions from "../transactions/Transactions";
 import Insights from "../insights/Insights";
+import FinancialEntities from "../financialEntities/index";
 import Login from "../models/Login";
 import { LoginResponse } from "../interfaces/login/LoginResponse";
 
@@ -25,6 +27,7 @@ interface IClassesDictionary {
   Transactions?: Transactions;
   Budgets?: Budgets;
   Insights?: Insights;
+  FinancialEntities?: FinancialEntities;
 }
 
 interface IConnectParams {
@@ -34,10 +37,13 @@ interface IConnectParams {
 
 export default class FinerioConnectSDK {
   private _includedClasses: string[];
-  private _serverUrl: string;
   private _apiToken: string = "";
+  private _apiKey: string = "";
+  private _baseURL: string = "";
+  private _refreshToken: string = "";
   private _sandbox: boolean;
-  private _headers: AxiosRequestHeaders;
+  private _axiosApiInstance: AxiosInstance;
+  private _tokenExpiresDate: Date | null = null;
   constructor(arg?: IConnectParams | string[] | string) {
     this._includedClasses = [];
     this._sandbox = false;
@@ -53,18 +59,59 @@ export default class FinerioConnectSDK {
         }
       }
     }
-    if (this._sandbox) this._serverUrl = SERVER_URL_SAND;
-    else this._serverUrl = SERVER_URL_PROD;
-    this._headers = {};
+
+    if (this._sandbox) {
+      this._baseURL = SERVER_URL_SAND;
+    } else {
+      this._baseURL = SERVER_URL_PROD;
+    }
+    this._axiosApiInstance = axios.create({
+      baseURL: this._baseURL,
+    });
+    this._axiosApiInstance.interceptors.request.use(
+      async (config) => {
+        if (this._apiToken && this._tokenExpiresDate) {
+          if (Date.now() >= this._tokenExpiresDate.getTime()) {
+            await this.refreshApiToken();
+          }
+          config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${this._apiToken}`,
+          };
+        }
+        return config;
+      },
+      (error) => {
+        Promise.reject(error);
+      }
+    );
+    this._axiosApiInstance.interceptors.response.use(
+      (response) => {
+        return response.data;
+      },
+      async (error) => {
+        const originalRequest = error.config;
+        if (
+          this.refreshToken &&
+          error.response.status === 401 &&
+          this._refreshToken &&
+          !originalRequest._retry
+        ) {
+          originalRequest._retry = true;
+          await this.refreshApiToken();
+          /* this._axiosApiInstance.defaults.headers.common["Authorization"] =
+            "Bearer " + access_token; */
+          return this._axiosApiInstance(originalRequest);
+        }
+        return Promise.reject(error);
+      }
+    );
   }
 
-  public connect(apiToken: string): IClassesDictionary {
-    this._apiToken = apiToken;
-    this._headers = {
-      ...this._headers,
-      Authorization: `Bearer ${apiToken}`,
-    };
-
+  public connect(apiKey?: string): IClassesDictionary {
+    if (apiKey) {
+      this._apiKey = apiKey;
+    }
     if (this._includedClasses.length) {
       return this._includedClasses.reduce((acc, current) => {
         switch (current) {
@@ -78,6 +125,8 @@ export default class FinerioConnectSDK {
             return { ...acc, Transactions: new Transactions(this) };
           case INSIGHTS_TYPE:
             return { ...acc, Insights: new Insights(this) };
+          case FINANCIAL_ENTITY_TYPE:
+            return { ...acc, FinancialEntities: new FinancialEntities(this) };
           default:
             return acc;
         }
@@ -89,6 +138,7 @@ export default class FinerioConnectSDK {
       Transactions: new Transactions(this),
       Budgets: new Budgets(this),
       Insights: new Insights(this),
+      FinancialEntities: new FinancialEntities(this)
     };
   }
 
@@ -110,16 +160,15 @@ export default class FinerioConnectSDK {
     return this._apiToken;
   }
 
-  get serverUrl(): string {
-    return this._serverUrl;
+  get refreshToken(): string {
+    return this._refreshToken;
   }
 
   public doGet(uri: string, success: (response: any) => any): Promise<any> {
-    const url = `${this._serverUrl}${uri}`;
     return new Promise<any>((resolve, reject) => {
-      axios
-        .get(url, { headers: this._headers })
-        .then((response) => resolve(success(response.data)))
+      this._axiosApiInstance
+        .get(uri)
+        .then((response) => resolve(success(response)))
         .catch((error) => this.processErrors(error, reject));
     });
   }
@@ -129,14 +178,11 @@ export default class FinerioConnectSDK {
     body: any,
     success: (response: any) => any
   ): Promise<any> {
-    const url = `${this._serverUrl}${uri}`;
     return new Promise<any>((resolve, reject) => {
-      axios
-        .post(url, body, {
-          headers: this._headers,
-        })
+      this._axiosApiInstance
+        .post(uri, body)
         .then((response) => {
-          resolve(success(response.data));
+          resolve(success(response));
         })
         .catch((error) => this.processErrors(error, reject));
     });
@@ -147,36 +193,73 @@ export default class FinerioConnectSDK {
     body: any,
     success: (response: any) => any
   ): Promise<any> {
-    const url = `${this._serverUrl}${uri}`;
     return new Promise<any>((resolve, reject) => {
-      axios
-        .put(url, body, { headers: this._headers })
-        .then((response) => resolve(success(response.data)))
+      this._axiosApiInstance
+        .put(uri, body)
+        .then((response) => resolve(success(response)))
         .catch((error) => this.processErrors(error, reject));
     });
   }
 
   public doDelete(uri: string, success: (response: any) => any): Promise<any> {
-    const url = `${this._serverUrl}${uri}`;
     return new Promise<any>((resolve, reject) => {
-      axios
-        .delete(url, { headers: this._headers })
-        .then((response) => resolve(success(response.data)))
+      this._axiosApiInstance
+        .delete(uri)
+        .then((response) => resolve(success(response)))
         .catch((error) => this.processErrors(error, reject));
     });
   }
 
-  public doLogin(
+  private setNewAccessData(data: LoginResponse) {
+    const { access_token, refresh_token, expires_in } = data;
+    const currentTimeAsMs = Date.now();
+    this._apiToken = access_token;
+    this._refreshToken = refresh_token;
+    this._tokenExpiresDate = new Date(currentTimeAsMs + expires_in);
+  }
+
+  public login(
     username: string,
     password: string,
     clientId: number
-  ): Promise<Login> {
-    const uri = `/login`;
-    return this.doPost(
-      uri,
-      { username, password, clientId },
-      this.processLogin
-    );
+  ): Promise<IClassesDictionary> {
+    return new Promise((resolve, reject) => {
+      const uri = `/login`;
+      this.doPost(uri, { username, password, clientId }, this.processLogin)
+        .then((response) => {
+          this.setNewAccessData(response);
+          resolve(this.connect());
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  }
+
+  public refreshApiToken(): Promise<any> {
+    return new Promise<any>((resolve, reject) => {
+      const uri = `${this._baseURL}/oauth/access_token?refresh_token=${this._refreshToken}`;
+      axios
+        .post(uri, "", {
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${this._apiToken}`,
+          },
+        })
+        .then(({ data }) => {
+          this.setNewAccessData(data);
+          resolve(true);
+        })
+        .catch((error) => {
+          reject(
+            new Error(
+              `${error.response.status}`,
+              error.response.data.path,
+              error.response.data.error
+            )
+          );
+        });
+    });
   }
 
   private processLogin(response: LoginResponse): Login {

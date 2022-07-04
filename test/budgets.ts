@@ -12,12 +12,7 @@ describe("Budgets", () => {
   });
 
   it("Get token", () => {
-    return fcs.doLogin(username, password, clientId).then((response) => {
-      const token = response.access_token;
-      expect(token).to.exist;
-      expect(token).to.be.string;
-
-      const { Budgets } = fcs.connect(token);
+    return fcs.login(username, password, clientId).then(({ Budgets }) => {
       it("Should be Exist", () => {
         return expect(Budgets).to.exist;
       });

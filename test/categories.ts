@@ -13,12 +13,7 @@ describe("Categories", () => {
   let categoryTest: CategoryModel;
 
   it("Get token", () => {
-    return fcs.doLogin(username, password, clientId).then((response) => {
-      const token = response.access_token;
-      expect(token).to.exist;
-      expect(token).to.be.string;
-
-      const { Categories } = fcs.connect(token);
+    return fcs.login(username, password, clientId).then(({ Categories }) => {
       describe("#Instance", () => {
         it("Should be Exist", () => {
           return expect(Categories).to.exist;
@@ -50,7 +45,7 @@ describe("Categories", () => {
             categoryTest = new CategoryModel(response);
             return expect(response).to.exist;
           });
-        });/*
+        }); /*
         it("Should create Category with parent", () => {
           const categoryPayload = new Category(
             "Test Parent",

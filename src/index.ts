@@ -5,6 +5,7 @@ export {
   TRANSACTION_TYPE,
   BUDGET_TYPE,
   INSIGHTS_TYPE,
+  FINANCIAL_ENTITY_TYPE
 } from "./constants";
 export {
   AccountPayload as Account,
