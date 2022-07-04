@@ -285,10 +285,14 @@ export default class FinerioConnectSDK {
 
   private createErrorBadRequest(errors: IErrorResponse) {
     const errorsList: Error[] = [];
-
-    errors.errors.forEach((error) => {
-      errorsList.push(new Error(error.code, error.title, error.detail));
-    });
+    if (errors.errors)
+      errors.errors.forEach((error) => {
+        errorsList.push(new Error(error.code, error.title, error.detail));
+      });
+    else if (errors.error)
+      errorsList.push(
+        new Error(`${errors.status}`, errors.error, `${errors.path}`)
+      );
 
     return errorsList;
   }

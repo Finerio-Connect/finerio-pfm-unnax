@@ -1,6 +1,6 @@
 # Finerio PFM Web SDK
 
-This SDK lets you connect to [Finerio PFM API](http://ec2-3-16-174-50.us-east-2.compute.amazonaws.com:8082/swagger-ui/index.html#/) in an easier way.
+This SDK lets you connect to [Finerio PFM API Unnax](http://ec2-3-16-174-50.us-east-2.compute.amazonaws.com:8082/swagger-ui/index.html#/) in an easier way.
 
 ## Table of contents
 
@@ -44,14 +44,14 @@ This SDK lets you connect to [Finerio PFM API](http://ec2-3-16-174-50.us-east-2.
 NPM:
 
 ```
-npm install finerio-pfm-web
+npm i finerio-pfm-unnax
 ```
 
 ## Setup
 
 ```javascript
-import { FinerioConnectSDK } from "finerio-pfm-web";
-import { CATEGORY_TYPE, TRANSACTION_TYPE } from "finerio-pfm-web";
+import { FinerioConnectSDK } from "finerio-pfm-unnax";
+import { CATEGORY_TYPE, TRANSACTION_TYPE } from "finerio-pfm-unnax";
 
 //The constructor can receive an object as parameter specifying in the includes key the SDK instances you want to use as an array of types or a single type, depending on which SDK instances you want to use and in sandbox key the environment to use.
 //If constructor has no parameters all the SDK instances will be returned and production mode will be used.
@@ -83,8 +83,6 @@ The following constant types can be used:
 
 ---
 
-**Production environment is not available at this version**
-
 ## Usage
 
 Finerio PFM Web uses **Promises** to fetch responses from the API.
@@ -98,7 +96,7 @@ An account is the representation of your users' bank accounts.
 Fetches a list of accounts per user, sorted by ID in descending order.
 
 ```javascript
-Accounts.list(cursor)
+Accounts.list(id)
   .then((data) => console.log(data))
   .catch((error) => console.log(error));
 ```
@@ -165,17 +163,20 @@ Account {
 Creates an account. A previosuly created user and a financial entity is required. You have to import the Account Payload Model to create a new one.
 
 ```javascript
-import { Account } from "finerio-pfm-web";
+import { Account } from "finerio-pfm-unnax";
 
 ...
-
+const financialEntityId = 1115164;
+const nature = "Mortgage",;
+const name = "Cuenta prueba",;
+const number = "1111 1111 1111 1111",;
+const balance = 1000;
 const account = new Account(
-        1115164,
-        743443,
-        "Mortgage",
-        "Cuenta prueba",
-        "1111 1111 1111 1111",
-        1000
+        financialEntityId,
+        nature,
+        name,
+        number,
+        balance
       );
 
 Accounts.create(account)
@@ -204,17 +205,21 @@ Account {
 Updates an account. You have to import the Account Payload Model to update it.
 
 ```javascript
-import { Account } from "finerio-pfm-web";
+import { Account } from "finerio-pfm-unnax";
 
 ...
 
+const financialEntityId = 1115164;
+const nature = "Mortgage",;
+const name = "Cuenta prueba 2",;
+const number = "1111 1111 1111 1111",;
+const balance = 1000;
 const account = new Account(
-        1115164,
-        743443,
-        "Mortgage",
-        "Cuenta prueba 2",
-        "1111 1111 1111 1111",
-        1000
+        financialEntityId,
+        nature,
+        name,
+        number,
+        balance
       );
 
 Accounts.update(accountId, account)
@@ -378,7 +383,7 @@ Category {
 Creates a category. If a user ID is not specified, the category is considered as a system category. If a parent category ID is specified, the category is considered a subcategory. You have to import the Category Payload Model to update it.
 
 ```javascript
-import { Category } from "finerio-pfm-web";
+import { Category } from "finerio-pfm-unnax";
 
 ...
 const name = "Streaming";
@@ -410,7 +415,7 @@ Category {
 Given a valid category id updates a category. You have to import the Category Payload Model to update it.
 
 ```javascript
-import { Category } from "finerio-pfm-web";
+import { Category } from "finerio-pfm-unnax";
 
 ...
 const name = "Streaming Test";
@@ -546,17 +551,22 @@ Transaction {
 Creates a transaction. A previosuly created account is required. You have to import the Transaction Payload Model to create a new one.
 
 ```javascript
-import { Transaction } from "finerio-pfm-web";
+import { Transaction } from "finerio-pfm-unnax";
 
 ...
-
+const accountId = 23;
+const date = new Date().getTime();
+const charge = true;
+const description = "Transaction Test";
+const amount = 1111;
+const categoryId = 26;
 const transaction = new Transaction(
-        2230303,
-        new Date(),
-        true,
-        "Transaction Test",
-        1111,
-        79
+        accountId,
+        date,
+        charge,
+        description,
+        amount,
+        categoryId
       );
 
 Transactions.create(transaction)
@@ -585,17 +595,23 @@ Transaction {
 Given a valid transaction id updates a transaction. The new name should not be previously registered. You have to import the Transaction Payload Model to update it.
 
 ```javascript
-import { Transaction } from "finerio-pfm-web";
+import { Transaction } from "finerio-pfm-unnax";
 
 ...
 
+const accountId = 23;
+const date = new Date().getTime();
+const charge = true;
+const description = "Edited Transaction Test";
+const amount = 1111;
+const categoryId = 26;
 const transaction = new Transaction(
-        2230303,
-        new Date(),
-        true,
-        "Edited Transaction Test",
-        1111,
-        79
+        accountId,
+        date,
+        charge,
+        description,
+        amount,
+        categoryId
       );
 
 Transactions.update(transactionId, transaction)
@@ -723,21 +739,19 @@ Budget {
 Creates a budget. You have to import the Budget Payload Model to create a new one.
 
 ```javascript
-import { Budget } from "finerio-pfm-web";
+import { Budget } from "finerio-pfm-unnax";
 
 ...
 const name = "Budget Test";
 const amount = 5000;
 const warningPercentage = 0.5;
 const categoryId = 15;
-const userId = 1115162;
 
 const newBudget = new Budget(
   name,
   amount,
   warningPercentage,
-  categoryId,
-  userId
+  categoryId
 );
 
 Budgets.create(newBudget)
@@ -768,7 +782,7 @@ Budget {
 Given a valid budget id updates a budget. You have to import the User Payload Model to update it.
 
 ```javascript
-import { Budget } from "finerio-pfm-web";
+import { Budget } from "finerio-pfm-unnax";
 
 ...
 

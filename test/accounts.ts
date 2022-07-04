@@ -24,7 +24,7 @@ describe("Accounts", () => {
           });
         });
         it("Should be Success", () => {
-          return Accounts?.list(23).then((response) => {
+          return Accounts?.list().then((response) => {
             expect(response).to.be.an("array");
             expect(response.length).to.be.greaterThan(0);
           });
