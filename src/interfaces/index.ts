@@ -4,6 +4,8 @@ export { default as ICategory } from "./category/ICategory";
 export { default as ICategoriesRes } from "./category/ICategoriesRes";
 export { default as IError } from "./IError";
 export { default as IErrorResponse } from "./IErrorResponse";
+export { default as IFinancialEntity } from "./financialEntity/IFinancialEntity";
+export { default as IFinancialEntityRes } from "./financialEntity/IFinancialEntityRes";
 export { default as ITransaction } from "./transaction/ITransaction";
 export { default as ITransactionRes } from "./transaction/ITransactionRes";
 export { default as IBudget } from "./budget/IBudget";
