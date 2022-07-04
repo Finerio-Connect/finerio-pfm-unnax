@@ -998,8 +998,8 @@ Output:
   },
   FinancialEntity {
     id: 13,
-    dateCreated: 1646243107260,
-    lastUpdated: 1646243107260,
+    dateCreated: 1646114400000,
+    lastUpdated: 1646114400000,
     name: "Central Bank",
     code: "CBK",
     image_path: "http://image/logo.png",
